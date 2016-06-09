@@ -16,17 +16,35 @@ ESP8266Arduino::~ESP8266Arduino(){
 }
 
 bool ESP8266Arduino::testConnection(){
-	this->debugMessage("Test connection");
+	String message = "AT+RST";
+	String neededResponse = "OK";
+	String testName = "Test Connection";
+	return this->sendAndreciveMessage(&message, &neededResponse, &testName);
+}
+
+
+bool ESP8266Arduino::sendAndreciveMessage(String *request, String *neededResponse, String *testName, bool iWannaMoreInfo, const int timeout){
+	this->debugMessage(*testName);
     this->clean();
-    this->serial->println("AT");
-    String response = this->serial->readString();
+    this->serial->println(*request);
+
+	long int time = millis();
+	String response = "";
+	while( (time+timeout) > millis() ){
+		while( this->serial->available() ){
+			response += this->serial->readString();
+		}
+	}
     response.trim();
-	String rightResponse = "OK";
-    if(this->find(&response, &rightResponse)){
-        this->debugMessage("connection OK");
+	if(iWannaMoreInfo){
+		this->debugMessage(response);
+		//this->debugMessage(*neededResponse);
+	}
+	if(this->find(&response, neededResponse)){
+        this->debugMessage("OK");
         return true;
     }else{
-        this->debugMessage("fuck...");
+        this->debugMessage(response);
         return false;
     }
 }
@@ -41,7 +59,12 @@ void ESP8266Arduino::clean(){
     this->serial->readString();
 }
 
+/**
+* find a string in an other string
+*/
 bool ESP8266Arduino::find(String *s, String *occ){
+	//this->debugMessage(*s);
+	//this->debugMessage(*occ);
 	unsigned occLen = occ->length();
 	unsigned sLen = s->length();
 	if(sLen < occLen) return false;
@@ -51,6 +74,7 @@ bool ESP8266Arduino::find(String *s, String *occ){
 			if(s->substring(i,i+occLen).equals(*occ)) return true;
 		}
 	}
+	return false;	
 }
 
 
@@ -66,3 +90,37 @@ String* ESP8266Arduino::cleanString(String *s){
     }
     return &res;
 }
+
+bool ESP8266Arduino::connectToWifi(String *ssid, String *pass){
+	bool isModuleInStationModeSet = this->setModeClient();
+	if(isModuleInStationModeSet){
+		//quitConnection();
+		String message = "AT+CWJAP=\"KDG-C1CFE\",\"F0Ey03x0YQU3\"";
+		String neededResponse = "WIFI CONNECTED";
+		String testName = "Connect to wifi";
+		return this->sendAndreciveMessage(&message, &neededResponse, &testName, false, 4000);
+	}
+	return false;
+}
+
+bool ESP8266Arduino::setModeClient(){
+	String message = "AT+CWMODE=1";
+	String neededResponse = "OK";
+	String testName = "Set module in client mode";
+	return this->sendAndreciveMessage(&message, &neededResponse, &testName);
+}
+
+bool ESP8266Arduino::quitConnection(){
+	String message = "AT+CWQAP";
+	String neededResponse = "OK";
+	String testName = "Quit connection";
+	return this->sendAndreciveMessage(&message, &neededResponse, &testName);
+}
+
+bool ESP8266Arduino::getIpAddress(){
+	String message = "AT+CIFSR";
+	String neededResponse = "OK";
+	String testName = "Get ip address";
+	return this->sendAndreciveMessage(&message, &neededResponse, &testName, true, 10000);
+}
+

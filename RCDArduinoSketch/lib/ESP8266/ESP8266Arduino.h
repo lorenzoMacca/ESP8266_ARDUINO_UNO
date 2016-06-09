@@ -22,12 +22,17 @@ class ESP8266Arduino{
         void clean();
         String* cleanString(String *s);
 		bool find(String *s, String *occ);
+		bool sendAndreciveMessage(String *request, String *neededResponse, String *testName, bool iWannaMoreInfo=false, const int timeout = 2000);
+		bool setModeClient();
 	
 	public:
 		ESP8266Arduino(SoftwareSerial *serial);
 		ESP8266Arduino(SoftwareSerial *serial, Stream *serialDebug);
 		~ESP8266Arduino();
 		bool testConnection();
+		bool connectToWifi(String *ssid, String *pass);
+		bool quitConnection();
+		bool getIpAddress();
 };
 
 #endif
