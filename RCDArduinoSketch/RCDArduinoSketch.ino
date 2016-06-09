@@ -6,8 +6,8 @@
 
 ESP8266Arduino *esp8266;
 SoftwareSerial esp8266Serial(RX_PIN, TX_PIN); // RX, TX
-String ssid = "";
-String pass = "";
+String ssid = "ssis";
+String pass = "pass";
 
 void setup() {
 	pinMode(RX_PIN, INPUT);

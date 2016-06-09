@@ -95,10 +95,16 @@ bool ESP8266Arduino::connectToWifi(String *ssid, String *pass){
 	bool isModuleInStationModeSet = this->setModeClient();
 	if(isModuleInStationModeSet){
 		//quitConnection();
-		String message = "AT+CWJAP=\"KDG-C1CFE\",\"F0Ey03x0YQU3\"";
+		//String message = "AT+CWJAP=\"KDG-C1CFE\",\"F0Ey03x0YQU3\"";
+		String message = "AT+CWJAP=";
+		message += "\"";
+		message += *ssid;
+		message += "\",\"";
+		message += *pass;
+		message += "\"";
 		String neededResponse = "WIFI CONNECTED";
 		String testName = "Connect to wifi";
-		return this->sendAndreciveMessage(&message, &neededResponse, &testName, false, 4000);
+		return this->sendAndreciveMessage(&message, &neededResponse, &testName, true, 4000);
 	}
 	return false;
 }
